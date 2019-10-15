@@ -25,13 +25,8 @@ pip install requirements.txt
  ```   
 
 Get model pretrained weights
- ```bash
-# download model weights
-wget
- 
-# download some images
-wget https://drive.google.com/file/d/1SAHOwnFLHhJAk_84zPlJ84dAmYl2TAdJ/view?usp=sharing 
-```
+- download model [weights](https://drive.google.com/file/d/1lAkmIRTLgFXjgO5PQ7NNOCYQeNh0JH-N/view?usp=sharing)
+- download some [test images](https://drive.google.com/file/d/1SAHOwnFLHhJAk_84zPlJ84dAmYl2TAdJ/view?usp=sharing)
 
 Next, get the embeddings for some images. First, modify paths inside `get_embs.py`.
 ```python
