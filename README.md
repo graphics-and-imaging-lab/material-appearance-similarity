@@ -1,6 +1,7 @@
 <div align="center">  
   
-# A Similarity Measure for Material Appearance    
+# A Similarity Measure for Material Appearance   
+[![Project page](https://img.shields.io/badge/-Project%20page-blue)](http://webdiis.unizar.es/~mlagunas/publication/material-similarity/)
 [![Paper](https://img.shields.io/badge/Paper-PDF-red)](http://webdiis.unizar.es/~mlagunas/papers/similarity_siggraph_19_small.pdf)
 [![Conference](https://img.shields.io/badge/SIGGRAPH-2019-green)](https://dl.acm.org/citation.cfm?id=3323036)
 [![Journal](https://img.shields.io/badge/TOG-2019-green)](https://dl.acm.org/citation.cfm?id=3323036)
@@ -13,6 +14,7 @@ We present a model to measure the similarity in appearance between different mat
 ## How to run   
 _Note that this has been tested using python 3.7_
 
+### Dependencies
 First, clone and install dependencies   
 ```bash
 # clone project   
@@ -24,36 +26,32 @@ pip install requirements.txt
  ```   
 
 Get model pretrained weights
- ```bash
-# download model weights
-wget
- 
-# download some images
-wget https://drive.google.com/file/d/1SAHOwnFLHhJAk_84zPlJ84dAmYl2TAdJ/view?usp=sharing 
-```
+- download model [weights](https://drive.google.com/file/d/1lAkmIRTLgFXjgO5PQ7NNOCYQeNh0JH-N/view?usp=sharing)
+- download some [test images](https://drive.google.com/file/d/1SAHOwnFLHhJAk_84zPlJ84dAmYl2TAdJ/view?usp=sharing)
 
-Next, get the embeddings for some images. First, modify paths inside `get_embs.py`.
+### Getting image feature vectors
+
+Next, get the feature vectors for some images. First, modify paths inside `get_embs.py`.
 ```python
 ...
 weights_path = './model_best.pth.tar'
 imgs_path = './havran1_stpeters_256x256_LDR'
-embs_path = './embs.mat'
+embs_path = './embs.mat' # we will store the obtained feature vectors in this path
 ...
 ```
 
-Then, get the embeddings for the downloaded images
+Then, get the feature vectors for the downloaded images
 ```bash
 python3 get_embs.py    
 ```
 
 ### Generate UMAP plot
 
-We can visualize the embeddings generated for the images using dimensionality reduction algorithms like UMAP. 
-First we set the path of the embeddings inside `plot_umap.py`.
+We can visualize the feature vectors generated for the images using dimensionality reduction algorithms like UMAP. 
+First we set the path of the feature vectors inside `plot_umap.py`.
 ```python
 embs_path = './embs.mat'
 ```
-
 
 To generate the plot we run:
 ```bash
