@@ -36,7 +36,7 @@ Next, get the feature vectors for some images. First, modify paths inside `get_e
 ...
 weights_path = './model_best.pth.tar'
 imgs_path = './havran1_stpeters_256x256_LDR'
-embs_path = './embs.mat'
+embs_path = './embs.mat' # we will store the obtained feature vectors in this path
 ...
 ```
 
@@ -52,7 +52,6 @@ First we set the path of the feature vectors inside `plot_umap.py`.
 ```python
 embs_path = './embs.mat'
 ```
-
 
 To generate the plot we run:
 ```bash
