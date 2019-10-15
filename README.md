@@ -53,6 +53,9 @@ First we set the path of the feature vectors inside `plot_umap.py`.
 embs_path = './embs.mat'
 ```
 
+This yields the following plot ![UMAP plot](__media/umap.png)
+
+
 To generate the plot we run:
 ```bash
 python3 plot_umap.py
