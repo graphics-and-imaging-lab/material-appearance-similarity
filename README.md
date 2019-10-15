@@ -1,6 +1,7 @@
 <div align="center">  
   
-# A Similarity Measure for Material Appearance    
+# A Similarity Measure for Material Appearance   
+[![Project page](https://img.shields.io/badge/-Project%20page-blue)](http://webdiis.unizar.es/~mlagunas/publication/material-similarity/)
 [![Paper](https://img.shields.io/badge/Paper-PDF-red)](http://webdiis.unizar.es/~mlagunas/papers/similarity_siggraph_19_small.pdf)
 [![Conference](https://img.shields.io/badge/SIGGRAPH-2019-green)](https://dl.acm.org/citation.cfm?id=3323036)
 [![Journal](https://img.shields.io/badge/TOG-2019-green)](https://dl.acm.org/citation.cfm?id=3323036)
