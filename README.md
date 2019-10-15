@@ -1,2 +1,76 @@
-# material-appearance-similarity
-Code for the paper "A Similarity Measure for Material Appearance"
+<div align="center">  
+  
+# A Similarity Measure for Material Appearance    
+[![Paper](https://img.shields.io/badge/Paper-PDF-red)](http://webdiis.unizar.es/~mlagunas/papers/similarity_siggraph_19_small.pdf)
+[![Conference](https://img.shields.io/badge/SIGGRAPH-2019-green)](https://dl.acm.org/citation.cfm?id=3323036)
+[![Journal](https://img.shields.io/badge/TOG-2019-green)](https://dl.acm.org/citation.cfm?id=3323036)
+
+</div>
+
+## Abstract   
+We present a model to measure the similarity in appearance between different materials, which correlates with human similarity judgments. We first create a database of 9,000 rendered images depicting objects with varying materials, shape and illumination. We then gather data on perceived similarity from crowdsourced experiments; our analysis of over 114,840 answers suggests that indeed a shared perception of appearance similarity exists. We feed this data to a deep learning architecture with a novel loss function, which learns a feature space for materials that correlates with such perceived appearance similarity. Our evaluation shows that our model outperforms existing metrics. Last, we demonstrate several applications enabled by our metric, including appearance-based search for material suggestions, database visualization, clustering and summarization, and gamut mapping.
+
+## How to run   
+_Note that this has been tested using python 3.7_
+
+First, clone and install dependencies   
+```bash
+# clone project   
+git clone https://github.com/mlagunas/material-appearance-similarity.git   
+
+cd material-appearance-similarity 
+pip install requirements.txt
+# install pytorch/torchvision (https://pytorch.org)
+ ```   
+
+Get model pretrained weights
+ ```bash
+# download model weights
+wget
+ 
+# download some images
+wget https://drive.google.com/file/d/1SAHOwnFLHhJAk_84zPlJ84dAmYl2TAdJ/view?usp=sharing 
+```
+
+Next, get the embeddings for some images. First, modify paths inside `get_embs.py`.
+```python
+...
+weights_path = './model_best.pth.tar'
+imgs_path = './havran1_stpeters_256x256_LDR'
+embs_path = './embs.mat'
+...
+```
+
+Then, get the embeddings for the downloaded images
+```bash
+python3 get_embs.py    
+```
+
+### Generate UMAP plot
+
+We can visualize the embeddings generated for the images using dimensionality reduction algorithms like UMAP. 
+First we set the path of the embeddings inside `plot_umap.py`.
+```python
+embs_path = './embs.mat'
+```
+
+
+To generate the plot we run:
+```bash
+python3 plot_umap.py
+```
+
+
+### Citation   
+If you found this code useful please cite the work as:
+```
+@article{lagunas2019similarity,
+    author = {Lagunas, Manuel and Malpica, Sandra and Serrano, Ana and
+    Garces, Elena and Gutierrez, Diego and Masia, Belen},
+    title = {A Similarity Measure for Material Appearance},
+    journal = {ACM Transactions on Graphics (SIGGRAPH 2019)},
+    volume = {38},
+    number = {4},
+    year = {2019}
+}
+```   
