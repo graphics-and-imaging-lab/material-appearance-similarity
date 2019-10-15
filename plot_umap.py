@@ -35,9 +35,9 @@ def _imscatter(x, y, image, color=None, ax=None, zoom=1.):
 
 
 if __name__ == '__main__':
-    mat_path = '/media/Data/Projects/2019-MATERIAL_SIMILARITY/code/minimal_working/embs.mat'
+    embs_path = './embs.mat'
 
-    mat_file = scipy.io.loadmat(mat_path)
+    mat_file = scipy.io.loadmat(embs_path)
     embs = mat_file['embs']
     img_paths = [str(elem).strip() for elem in mat_file['img_paths']]
 

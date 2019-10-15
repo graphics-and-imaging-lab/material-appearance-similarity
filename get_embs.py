@@ -37,8 +37,9 @@ def get_embeddings(model, imgs):
 
 
 if __name__ == '__main__':
-    weights_path = '/media/Data/Projects/2019-MATERIAL_SIMILARITY/code/minimal_working/model_best.pth.tar'
-    imgs_path = '/media/Data/Projects/2019-MATERIAL_SIMILARITY/code/minimal_working/havran1_stpeters_256x256_LDR'
+    weights_path = './model_best.pth.tar'
+    imgs_path = './havran1_stpeters_256x256_LDR'
+    embs_path = './embs.mat'
 
     model = utils.load_model(weights_path)
     imgs, img_paths = utils.load_imgs(imgs_path)
