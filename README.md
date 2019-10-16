@@ -52,15 +52,14 @@ First we set the path of the feature vectors inside `plot_umap.py`.
 ```python
 embs_path = './embs.mat'
 ```
-
 To generate the plot we run:
 ```bash
 python3 plot_umap.py
 ```
+<img src="__media/umap.png" width="384">
 
-
-### Citation   
-If you found this code useful please cite the work as:
+## Citation   
+If you found this code useful please cite our work as:
 ```
 @article{lagunas2019similarity,
     author = {Lagunas, Manuel and Malpica, Sandra and Serrano, Ana and
