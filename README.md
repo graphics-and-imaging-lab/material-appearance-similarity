@@ -50,7 +50,7 @@ python3 get_embs.py
 
 ### Get similar images
 We can obtain similar images to a given reference using the previously computed feature vectors. First, set the path and necesary variables in `plot_similar.py`. This will store the 5 more similar images to the reference according to our metric in the path `data/nickel`.
-```
+```python
 ...
 embs_path = 'data/embs.mat'  # /mat file with the embeddings
 n_close_elems = 5  # number of close elements to find
