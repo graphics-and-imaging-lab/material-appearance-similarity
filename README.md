@@ -66,7 +66,9 @@ reference_img = 'data/havran1_stpeters_256x256_LDR/nickel.png'
 We can visualize the feature vectors generated for the images using dimensionality reduction algorithms like UMAP. 
 First we set the path of the feature vectors inside `plot_umap.py`. 
 ```python
+...
 embs_path = 'data/embs.mat'
+...
 ```
 To generate the plot we run:
 ```bash
