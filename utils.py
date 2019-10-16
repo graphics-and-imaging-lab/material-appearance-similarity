@@ -16,8 +16,15 @@ DEFAULT_TRF = transforms.Compose([
 
 
 def load_model(weights_path=None):
-    model, layers_to_remove = models.resnet34(pretrained=True), 1
-    model = FTModel(model, layers_to_remove=layers_to_remove, num_features=128, num_classes=100, train_only_fc=False)
+    """ Load model with IMAGENET weights if other pretrained weights
+    are not given
+    """
+    model, layers_to_remove = models.resnet34(pretrained=weights_path is None), 1
+    model = FTModel(model,
+                    layers_to_remove=layers_to_remove,
+                    num_features=128,
+                    num_classes=100,
+                    train_only_fc=False)
 
     if weights_path is not None:
         print('loading model weights')
@@ -36,10 +43,16 @@ def load_model(weights_path=None):
     return model
 
 
+def pil_loader(image_path):
+    """loads a path in a PIL image
+    """
+    return PIL.Image.open(image_path)
+
+
 def load_imgs(imgs_path, trf_test=None):
-    def ldr_loader(image_path):
-        """loads a path in a PIL image"""
-        return PIL.Image.open(image_path)
+    """ Loads imgs from a folder. If no transforms are given it just
+        resizes and performs a center crop of the image.
+    """
 
     if trf_test is None:
         trf_test = DEFAULT_TRF
@@ -53,6 +66,18 @@ def load_imgs(imgs_path, trf_test=None):
     # load all the images
     print('loading images')
     for i, img_path in enumerate(img_paths):
-        imgs_tensor[i] = trf_test(ldr_loader(img_path))
+        imgs_tensor[i] = trf_test(pil_loader(img_path))
 
     return imgs_tensor, img_paths
+
+
+def pairwise_dist(x):
+    """ Computes pairwise distances between features
+        x : torch tensor with shape Batch x n_features
+    """
+    n = x.size(0)
+    dist = torch.pow(x, 2).sum(dim=1, keepdim=True).expand(n, n)
+    dist = dist + dist.t()
+    dist.addmm_(1, -2, x, x.t())
+    dist = dist.clamp(min=1e-12).sqrt()  # numerical stability
+    return dist

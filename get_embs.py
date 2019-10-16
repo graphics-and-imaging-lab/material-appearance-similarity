@@ -37,14 +37,15 @@ def get_embeddings(model, imgs):
 
 
 if __name__ == '__main__':
-    weights_path = './model_best.pth.tar'
-    imgs_path = './havran1_stpeters_256x256_LDR'
-    embs_path = './embs.mat'  # we will store the obtained feature vectors in this path
+    weights_path = 'data/model_best.pth.tar'
+    imgs_path = 'data/havran1_stpeters_256x256_LDR'
+    # we will store the obtained feature vectors in this path
+    embs_path = 'data/embs.mat'
 
     model = utils.load_model(weights_path)
     imgs, img_paths = utils.load_imgs(imgs_path)
     embs = get_embeddings(model, imgs)
 
-    scipy.io.savemat('embs.mat', mdict={'embs': embs, 'img_paths': img_paths})
+    scipy.io.savemat(embs_path, mdict={'embs': embs, 'img_paths': img_paths})
 
     print('done')

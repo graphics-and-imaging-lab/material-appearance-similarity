@@ -35,7 +35,7 @@ def _imscatter(x, y, image, color=None, ax=None, zoom=1.):
 
 
 if __name__ == '__main__':
-    embs_path = './embs.mat'
+    embs_path = 'data/embs.mat'
 
     mat_file = scipy.io.loadmat(embs_path)
     embs = mat_file['embs']
