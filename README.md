@@ -27,8 +27,7 @@ pip install scipy numpy matplotlib umap-learn Pillow
 
 Get model pretrained weights
 - download model [weights](https://drive.google.com/file/d/1lAkmIRTLgFXjgO5PQ7NNOCYQeNh0JH-N/view?usp=sharing)
-- download some [test images](https://drive.google.com/file/d/1SAHOwnFLHhJAk_84zPlJ84dAmYl2TAdJ/view?usp=sharing)
-- download [all images](https://drive.google.com/file/d/1v7hQHIrLZYocn-rW9kalVQP8wYQ6Kg3x/view?usp=sharing)
+- _(optional)_ download [all images](https://drive.google.com/file/d/1v7hQHIrLZYocn-rW9kalVQP8wYQ6Kg3x/view?usp=sharing)
 
 ## How to run the code  
 
