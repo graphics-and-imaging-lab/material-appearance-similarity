@@ -77,7 +77,7 @@ To generate the plot we run:
 python3 plot_umap.py
 ```
 <div align="center">  
-<img src="__media/umap.png" width="384">
+<img src="__media/umap.png" >
 </div>
 
 ## Citation   
