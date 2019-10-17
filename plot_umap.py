@@ -4,6 +4,7 @@ import umap
 import torch
 from matplotlib import pyplot as plt
 from matplotlib.offsetbox import OffsetImage, AnnotationBbox
+from skimage import transform
 
 
 def _imscatter(x, y, image, color=None, ax=None, zoom=1.):
@@ -14,6 +15,8 @@ def _imscatter(x, y, image, color=None, ax=None, zoom=1.):
         ax = plt.gca()
     try:
         image = plt.imread(image)
+        size=min(image.shape[0], image.shape[1])
+        image = transform.resize(image[:size,:size], (256,256))
     except TypeError:
         # Likely already an array...
         pass
