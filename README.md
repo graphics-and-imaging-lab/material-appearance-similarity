@@ -21,7 +21,7 @@ First, clone and install dependencies
 git clone https://github.com/mlagunas/material-appearance-similarity.git   
 
 cd material-appearance-similarity 
-pip install requirements.txt
+pip install -r requirements.txt
 # install pytorch/torchvision (https://pytorch.org)
  ```   
 
