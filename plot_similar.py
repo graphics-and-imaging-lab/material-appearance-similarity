@@ -56,6 +56,7 @@ if __name__ == '__main__':
     print('loading embedding')
     mat_file = scipy.io.loadmat(embs_path)
     embs = torch.tensor(mat_file['embs'])
+    embs /= embs.norm(p=2)
     img_paths = [str(elem).strip() for elem in mat_file['img_paths']]
 
     # get pairwise distances between features

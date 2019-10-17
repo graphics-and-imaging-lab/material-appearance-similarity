@@ -30,7 +30,7 @@ def load_model(weights_path=None):
         print('loading model weights')
         if os.path.isfile(weights_path):
             print(" => loading checkpoint '{}'".format(weights_path))
-            checkpoint = torch.load(weights_path)
+            checkpoint = torch.load(weights_path, map_location=DEVICE)
             model.load_state_dict(checkpoint['state_dict'])
             print(" => loaded checkpoint '{}' (epoch {})"
                   .format(weights_path, checkpoint['epoch']))
