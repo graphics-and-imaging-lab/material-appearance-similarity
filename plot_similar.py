@@ -51,12 +51,16 @@ if __name__ == '__main__':
     embs_path = 'data/embs.mat'  # /mat file with the embeddings
     n_close_elems = 5  # number of close elements to find
     reference_img = 'data/havran1_stpeters_256x256_LDR/nickel.png'
+    do_unit_norm = False
 
     # load embeddings
     print('loading embedding')
     mat_file = scipy.io.loadmat(embs_path)
     embs = torch.tensor(mat_file['embs'])
-    embs /= embs.norm(p=2)
+
+    if do_unit_norm:
+        embs /= embs.norm(p=2, dim=1, keepdim=True)
+
     img_paths = [str(elem).strip() for elem in mat_file['img_paths']]
 
     # get pairwise distances between features
@@ -79,4 +83,3 @@ if __name__ == '__main__':
     copy_k_closer(reference_ix, k=n_close_elems,
                   dist=all_images_dist, image_paths=img_paths, folder=out_folder)
     print('output is stored in %s' % out_folder)
-

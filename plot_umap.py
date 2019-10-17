@@ -1,6 +1,7 @@
 import numpy as np
 import scipy.io
 import umap
+import torch
 from matplotlib import pyplot as plt
 from matplotlib.offsetbox import OffsetImage, AnnotationBbox
 
@@ -36,9 +37,17 @@ def _imscatter(x, y, image, color=None, ax=None, zoom=1.):
 
 if __name__ == '__main__':
     embs_path = 'data/embs.mat'
+    do_unit_norm = False
+
 
     mat_file = scipy.io.loadmat(embs_path)
-    embs = mat_file['embs']
+    embs = torch.tensor(mat_file['embs'])
+
+    if do_unit_norm:
+        embs /= embs.norm(p=2, dim=1, keepdim=True)
+        embs = embs.numpy()
+
+
     img_paths = [str(elem).strip() for elem in mat_file['img_paths']]
 
     # get umap from the embeddings
