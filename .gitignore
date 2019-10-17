@@ -1,7 +1,6 @@
 
 .idea/
 *.tar
-havran1_stpeters_256x256_LDR/
 *.mat
 
 # Byte-compiled / optimized / DLL files
