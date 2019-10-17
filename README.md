@@ -55,6 +55,7 @@ We can obtain similar images to a given reference using the previously computed 
 embs_path = 'data/embs.mat'  # /mat file with the embeddings
 n_close_elems = 5  # number of close elements to find
 reference_img = 'data/havran1_stpeters_256x256_LDR/nickel.png'
+do_unit_norm = False # normalize feature vectors to have unit norm
 ...
 ```
 <div align="center">  
@@ -68,6 +69,7 @@ First we set the path of the feature vectors inside `plot_umap.py`.
 ```python
 ...
 embs_path = 'data/embs.mat'
+do_unit_norm = False # normalize feature vectors to have unit norm
 ...
 ```
 To generate the plot we run:

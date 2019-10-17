@@ -63,4 +63,7 @@ if __name__ == '__main__':
     ax = fig.gca()
     for i, point in enumerate(umap_emb):
         _imscatter(point[0], point[1], img_paths[i], zoom=0.12, ax=ax)
+
+    plt.xticks([])
+    plt.yticks([])
     plt.show()
