@@ -46,7 +46,7 @@ def load_model(weights_path=None):
 def pil_loader(image_path):
     """loads a path in a PIL image
     """
-    return PIL.Image.open(image_path)
+    return PIL.Image.open(image_path).convert('RGB')
 
 
 def load_imgs(imgs_path, trf_test=None):
