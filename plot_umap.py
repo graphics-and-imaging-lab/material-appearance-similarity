@@ -1,10 +1,13 @@
 import numpy as np
 import scipy.io
-import umap
 import torch
+import umap
 from matplotlib import pyplot as plt
 from matplotlib.offsetbox import OffsetImage, AnnotationBbox
 from skimage import transform
+
+np.random.seed(123)
+torch.manual_seed(123)
 
 
 def _imscatter(x, y, image, color=None, ax=None, zoom=1.):
@@ -15,8 +18,8 @@ def _imscatter(x, y, image, color=None, ax=None, zoom=1.):
         ax = plt.gca()
     try:
         image = plt.imread(image)
-        size=min(image.shape[0], image.shape[1])
-        image = transform.resize(image[:size,:size], (256,256))
+        size = min(image.shape[0], image.shape[1])
+        image = transform.resize(image[:size, :size], (256, 256))
     except TypeError:
         # Likely already an array...
         pass
@@ -39,9 +42,8 @@ def _imscatter(x, y, image, color=None, ax=None, zoom=1.):
 
 
 if __name__ == '__main__':
-    embs_path = 'data/embs.mat'
+    embs_path = 'data/embs_havran_ennis.mat'
     do_unit_norm = False
-
 
     mat_file = scipy.io.loadmat(embs_path)
     embs = torch.tensor(mat_file['embs'])
@@ -50,14 +52,14 @@ if __name__ == '__main__':
         embs /= embs.norm(p=2, dim=1, keepdim=True)
         embs = embs.numpy()
 
-
     img_paths = [str(elem).strip() for elem in mat_file['img_paths']]
 
     # get umap from the embeddings
+
     umap_fit = umap.UMAP(n_neighbors=16,
                          init='spectral',
                          min_dist=6,
-                         spread=7,
+                         spread=8,
                          metric='l1')
     umap_emb = umap_fit.fit_transform(embs)
 
@@ -66,7 +68,8 @@ if __name__ == '__main__':
     ax = fig.gca()
     for i, point in enumerate(umap_emb):
         _imscatter(point[0], point[1], img_paths[i], zoom=0.12, ax=ax)
-
     plt.xticks([])
     plt.yticks([])
+    plt.gca().invert_yaxis()
+    plt.gca().invert_xaxis()
     plt.show()

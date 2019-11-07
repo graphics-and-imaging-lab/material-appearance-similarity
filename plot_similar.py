@@ -48,10 +48,10 @@ def copy_k_closer(reference_ix, k, dist, image_paths, folder='./'):
 
 
 if __name__ == '__main__':
-    embs_path = 'data/embs.mat'  # /mat file with the embeddings
+    embs_path = 'data/embs_havran_ennis.mat'  # /mat file with the embeddings
     n_close_elems = 5  # number of close elements to find
-    reference_img = 'data/havran1_stpeters_256x256_LDR/nickel.png'
-    do_unit_norm = False
+    reference_img = 'data/havran1_ennis_298x298_LDR/aluminium.jpg'
+    do_unit_norm = True
 
     # load embeddings
     print('loading embedding')
@@ -73,7 +73,7 @@ if __name__ == '__main__':
     try:
         reference_ix = img_paths.index(reference_img)
     except ValueError:
-        reference_ix = random.randint(len(img_paths))
+        reference_ix = random.randint(0, len(img_paths))
         reference_img = img_paths[reference_ix]
         print('reference image not found. Randomly selected %s as reference img'
               % reference_img)
