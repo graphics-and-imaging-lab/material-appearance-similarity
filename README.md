@@ -58,7 +58,7 @@ do_unit_norm = False # normalize feature vectors to have unit norm
 ...
 ```
 <div align="center">  
-<img src="__media/similar.png">
+<img src="__media__/similar.png">
 </div>
 
 ### Generate UMAP plot
@@ -76,7 +76,7 @@ To generate the plot we run:
 python3 plot_umap.py
 ```
 <div align="center">  
-<img src="__media/umap.png" >
+<img src="__media__/umap.png" >
 </div>
 
 ## Citation   
