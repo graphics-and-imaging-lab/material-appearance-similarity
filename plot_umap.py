@@ -55,10 +55,9 @@ if __name__ == '__main__':
     img_paths = [str(elem).strip() for elem in mat_file['img_paths']]
 
     # get umap from the embeddings
-
-    umap_fit = umap.UMAP(n_neighbors=16,
+    umap_fit = umap.UMAP(n_neighbors=30,
                          init='spectral',
-                         min_dist=6,
+                         min_dist=4,
                          spread=8,
                          metric='l1')
     umap_emb = umap_fit.fit_transform(embs)
