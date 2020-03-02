@@ -40,8 +40,14 @@ if __name__ == '__main__':
 
     # get weights path to load in the model, path to store embeddings and if the
     # model is Efficient Net.
-    # weights, is_efficientnet = 'data/resnet_similarity_best.pth.tar', False
-    # weights, is_efficientnet = 'data/resnet_classification_best.pth.tar', False
+    # weights, embs_path, is_efficientnet = \
+    #     'data/resnet_similarity_best.pth.tar', \
+    #     'data/resnet_similarity_embs_havran_ennis', \
+    #     False
+    # weights, embs_path, is_efficientnet = \
+    #     'data/resnet_classification_best.pth.tar', \
+    #     'data/resnet_classification_embs_havran_ennis', \
+    #     False
     weights_path, embs_path, is_efficientnet = \
         'data/efficientnet_similarity_best.pth.tar', \
         'data/efficientnet_similarity_embs_havran_ennis', \
