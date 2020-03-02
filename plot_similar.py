@@ -48,7 +48,7 @@ def copy_k_closer(reference_ix, k, dist, image_paths, folder='./'):
 
 
 if __name__ == '__main__':
-    embs_path = 'data/embs_havran_ennis.mat'  # /mat file with the embeddings
+    embs_path = 'data/embs_similarity_resnet_havran_ennis.mat'  # /mat file with the embeddings
     n_close_elems = 5  # number of close elements to find
     reference_img = 'data/havran1_ennis_298x298_LDR/aluminium.jpg'
     do_unit_norm = True
