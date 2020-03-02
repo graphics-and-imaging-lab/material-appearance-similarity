@@ -32,7 +32,7 @@ def _imscatter(x, y, image, color=None, ax=None, zoom=1.):
             if color is not None else None
         ab = AnnotationBbox(im, (x0, y0),
                             xycoords='data',
-                            frameon=True,
+                            frameon=False,
                             bboxprops=edgecolor,
                             )
         artists.append(ax.add_artist(ab))
@@ -42,7 +42,7 @@ def _imscatter(x, y, image, color=None, ax=None, zoom=1.):
 
 
 if __name__ == '__main__':
-    embs_path = 'data/embs_similarity_efficientnet_havran_ennis.mat'
+    embs_path = 'data/embs_havran_ennis.mat'
     do_unit_norm = False
 
     mat_file = scipy.io.loadmat(embs_path)
@@ -55,26 +55,20 @@ if __name__ == '__main__':
     img_paths = [str(elem).strip() for elem in mat_file['img_paths']]
 
     # get umap from the embeddings
-    umap_fit = umap.UMAP(n_neighbors=5,
+    umap_fit = umap.UMAP(n_neighbors=30,
                          init='spectral',
                          min_dist=4,
                          spread=8,
-                         metric='l2')
-    # umap_fit = umap.UMAP(init='spectral', n_neighbors=11, metric='l1')
+                         metric='l1')
     umap_emb = umap_fit.fit_transform(embs)
 
     # plot each point of the umap as its corresponding image
-    fig = plt.figure(figsize=(8, 10))
+    fig = plt.figure()
     ax = fig.gca()
     for i, point in enumerate(umap_emb):
-        _imscatter(point[0], point[1],
-                   image=img_paths[i],
-                   color='white',
-                   zoom=0.18,
-                   ax=ax)
+        _imscatter(point[0], point[1], img_paths[i], zoom=0.12, ax=ax)
     plt.xticks([])
     plt.yticks([])
-    plt.savefig("data/classification_umap.pdf")
-    # plt.gca().invert_yaxis()
-    # plt.gca().invert_xaxis()
+    plt.gca().invert_yaxis()
+    plt.gca().invert_xaxis()
     plt.show()

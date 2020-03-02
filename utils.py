@@ -3,8 +3,8 @@ import os
 import PIL
 import torch
 from torchvision import models, transforms
-from efficientnet_pytorch import EfficientNet
-from model import FTModel, FTModelEf
+
+from model import FTModel
 
 DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 IMG_SIZE = 224
@@ -15,45 +15,16 @@ DEFAULT_TRF = transforms.Compose([
 ])
 
 
-def load_model_efficientnet(weights_path=None):
-    model = FTModel
-
-
 def load_model(weights_path=None):
     """ Load model with IMAGENET weights if other pretrained weights
     are not given
     """
-    model, layers_to_remove = models.resnet34(
-        pretrained=weights_path is None), 1
+    model, layers_to_remove = models.resnet34(pretrained=weights_path is None), 1
     model = FTModel(model,
                     layers_to_remove=layers_to_remove,
                     num_features=128,
                     num_classes=100,
                     train_only_fc=False)
-
-    if weights_path is not None:
-        print('loading model weights')
-        if os.path.isfile(weights_path):
-            print(" => loading checkpoint '{}'".format(weights_path))
-            checkpoint = torch.load(weights_path, map_location=DEVICE)
-            model.load_state_dict(checkpoint['state_dict'])
-            print(" => loaded checkpoint '{}' (epoch {})"
-                  .format(weights_path, checkpoint['epoch']))
-        else:
-            print("=> no checkpoint found at '{}'".format(weights_path))
-
-    model.to(DEVICE)
-    model.eval()
-
-    return model
-
-
-def load_model_ef(weights_path=None):
-    """ Load model with IMAGENET weights if other pretrained weights
-    are not given
-    """
-    model = EfficientNet.from_pretrained('efficientnet-b0', num_classes=128)
-    model = FTModelEf(model, num_classes=100, )
 
     if weights_path is not None:
         print('loading model weights')
@@ -87,9 +58,7 @@ def load_imgs(imgs_path, trf_test=None):
         trf_test = DEFAULT_TRF
 
     # get all the image paths
-    img_paths = [os.path.join(dp, f) for dp, dn, filenames in os.walk(imgs_path)
-                 for f in filenames]
-    img_paths.sort()
+    img_paths = [os.path.join(dp, f) for dp, dn, filenames in os.walk(imgs_path) for f in filenames]
 
     # prepare data structures
     imgs_tensor = torch.zeros(len(img_paths), 3, IMG_SIZE, IMG_SIZE).to(DEVICE)
