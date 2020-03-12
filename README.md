@@ -45,7 +45,7 @@ Then, set up those arguments in the trianing script and run it:
 train.py --train-dir data/split_dataset --test-dir data/havran1_ennis_298x298_LDR
 ```
 Using the default values in the script, the trained model yields an agreement of
- 82.99% with users' answers.
+ 81.99% with users' answers.
  
 
 
