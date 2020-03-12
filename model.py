@@ -2,7 +2,8 @@ from torch import nn
 
 
 class FTModel(nn.Module):
-    def __init__(self, pretrained, layers_to_remove, num_features, num_classes, input_size=3, train_only_fc=False):
+    def __init__(self, pretrained, layers_to_remove, num_features, num_classes,
+                 input_size=3, train_only_fc=False):
         super(FTModel, self).__init__()
 
         # extract number of features in the last layer before the ones we remove
@@ -19,7 +20,8 @@ class FTModel(nn.Module):
                                       stride=first_conv.stride)
         self.new_model = nn.Sequential(*old_layers)
         self.fc = nn.Linear(in_features, num_features)
-        self.drop = nn.Dropout(p=0.05)
+
+        # needed only if we want to do classification
         self.fc2 = nn.Linear(num_features, num_classes)
 
         self.train_only_fc = train_only_fc
@@ -31,6 +33,5 @@ class FTModel(nn.Module):
         x = self.new_model(x)
         x = x.view(x.size(0), -1)
         x = self.fc(x)
-        embs = x
-        x = self.fc2(x)
-        return x, embs
+        pred = self.fc2(x)
+        return pred, x

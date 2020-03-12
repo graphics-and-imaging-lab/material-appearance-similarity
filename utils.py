@@ -1,5 +1,4 @@
 import os
-
 import PIL
 import torch
 from torchvision import models, transforms
@@ -19,7 +18,8 @@ def load_model(weights_path=None):
     """ Load model with IMAGENET weights if other pretrained weights
     are not given
     """
-    model, layers_to_remove = models.resnet34(pretrained=weights_path is None), 1
+    model, layers_to_remove = models.resnet34(
+        pretrained=weights_path is None), 1
     model = FTModel(model,
                     layers_to_remove=layers_to_remove,
                     num_features=128,
@@ -58,7 +58,9 @@ def load_imgs(imgs_path, trf_test=None):
         trf_test = DEFAULT_TRF
 
     # get all the image paths
-    img_paths = [os.path.join(dp, f) for dp, dn, filenames in os.walk(imgs_path) for f in filenames]
+    img_paths = [os.path.join(dp, f) for dp, dn, filenames in os.walk(imgs_path)
+                 for f in filenames]
+    img_paths.sort()
 
     # prepare data structures
     imgs_tensor = torch.zeros(len(img_paths), 3, IMG_SIZE, IMG_SIZE).to(DEVICE)
