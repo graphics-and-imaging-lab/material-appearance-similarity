@@ -53,7 +53,6 @@ if __name__ == '__main__':
     model = utils.load_model(weights_path, input_size=1)
     imgs, img_paths = utils.load_imgs(imgs_path, trf_test=trf)
     embs = get_embeddings(model, imgs)
-
     scipy.io.savemat(embs_path, mdict={'embs': embs, 'img_paths': img_paths})
 
     print('done')

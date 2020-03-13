@@ -33,6 +33,8 @@ class FTModel(nn.Module):
         if self.train_only_fc:
             for params in self.new_model.parameters():
                 params.requires_grad = False
+            for params in self.fc.parameters():
+                params.requires_grad = False
 
     def forward(self, x):
         x = self.new_model(x)

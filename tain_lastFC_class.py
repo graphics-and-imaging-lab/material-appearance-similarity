@@ -2,7 +2,6 @@ import torch
 import os
 import argparse
 import shutil
-import utils
 import numpy as np
 import random
 import torchvision.transforms.functional as transforms_F
@@ -13,7 +12,7 @@ from PIL import Image
 from torchvision import transforms, models
 from datetime import datetime
 from torchvision.datasets import ImageFolder
-from losses import TripletLossHuman
+import losses
 from model import FTModel
 from tqdm import tqdm
 
@@ -59,13 +58,13 @@ parser.add_argument('--margin',
                     default=0.3, type=float,
                     help='triplet loss margin')
 parser.add_argument('--checkpoint-folder',
-                    default='./checkpoints',
+                    default='./checkpoints_lastFC_class',
                     type=str, help='folder to store the trained models')
 parser.add_argument('--model-name',
                     default='resnet_similarity', type=str,
                     help='name given to the model')
 parser.add_argument('--resume',
-                    default='', type=str, metavar='PATH',
+                    default=None, type=str, metavar='PATH',
                     help='path to latest checkpoint (default: none)')
 parser.add_argument('-e', '--evaluate',
                     dest='evaluate', action='store_true',
@@ -108,12 +107,32 @@ class RandomResize(object):
         return transforms_F.resize(img, size, self.interpolation)
 
 
-def epoch_iterator(loader, epoch, is_train):
-    def update_progress_bar(progress_bar, losses):
+def accuracy(output, target, topk=(1,)):
+    """ Computes the accuracy over the k top predictions for the specified
+        values of k
+    """
+    with torch.no_grad():
+        maxk = max(topk)
+        batch_size = target.size(0)
+
+        _, pred = output.topk(maxk, 1, True, True)
+        pred = pred.t()
+        correct = pred.eq(target.view(1, -1).expand_as(pred))
+
+        res = []
+        for k in topk:
+            correct_k = correct[:k].view(-1).float().sum(0, keepdim=True)
+            res.append(correct_k.mul_(100.0 / batch_size))
+        return res
+
+
+def iterate_model(loader, epoch, is_train=True):
+    def update_progress_bar(progress_bar, losses, acc_t1, acc_t5):
         description = '[' + str(epoch) + '-'
-        description += 'train]' if is_train else 'val]'
-        description += ' Triplet loss: '
-        description += '%.4f/ %.4f (AVG)' % (losses.val, losses.avg)
+        description += '%s]' % 'train' if is_train else 'val'
+        description += ' Loss: %.4f/ %.4f (AVG)' % (losses.val, losses.avg)
+        description += ' Acc (t1) %2.2f/ %2.2f (AVG)' % (acc_t1.val, acc_t1.avg)
+        description += ' Acc (t5) %2.2f/ %2.2f (AVG)' % (acc_t5.val, acc_t5.avg)
         progress_bar.set_description(description)
 
     global model
@@ -122,6 +141,8 @@ def epoch_iterator(loader, epoch, is_train):
 
     # keep track of the loss value
     losses = AverageMeter()
+    acc_t1 = AverageMeter()
+    acc_t5 = AverageMeter()
 
     progress_bar = tqdm(loader, total=len(loader))
     for imgs, targets in progress_bar:
@@ -130,8 +151,8 @@ def epoch_iterator(loader, epoch, is_train):
             targets = targets.to(device, dtype)
 
             # forward through the model and compute error
-            _, embeddings = model(imgs)
-            loss = criterion(embeddings, targets)
+            preds, _ = model(imgs)
+            loss = criterion(preds, targets)
             losses.update(loss.item(), imgs.size(0))
 
             if is_train:
@@ -140,32 +161,13 @@ def epoch_iterator(loader, epoch, is_train):
                 loss.backward()
                 optimizer.step()
 
-            update_progress_bar(progress_bar, losses)
+            t1, t5 = accuracy(preds, targets, topk=(1, 5))
+            acc_t1.update(t1, len(targets))
+            acc_t5.update(t5, len(targets))
+
+            update_progress_bar(progress_bar, losses, acc_t1, acc_t5)
 
     return losses.avg
-
-
-def evaluate_model():
-    # get current agreement with users answers
-    current_agreement_train = criterion.get_majority_accuracy(
-        mturk_images=mturk_images,
-        model=model,
-        train=True,
-        unit_norm=True
-    )
-    current_agreement = criterion.get_majority_accuracy(
-        mturk_images=mturk_images,
-        model=model,
-        train=False,
-        unit_norm=True
-    )
-
-    tqdm.write('[Train]Current agreement %.4f (Best agreement %.4f)' %
-               (current_agreement_train, best_agreement))
-    tqdm.write('[Test]Current agreement %.4f (Best agreement %.4f)' %
-               (current_agreement, best_agreement))
-
-    return current_agreement
 
 
 def get_transforms():
@@ -188,7 +190,7 @@ def get_transforms():
     return trf_train, trf_test
 
 
-def get_dataloaders(trf_train):
+def get_dataloaders(trf_train, trf_test):
     global args
 
     def _init_loader_(worker_id):
@@ -213,13 +215,22 @@ def get_dataloaders(trf_train):
     loader_val = DataLoader(
         dataset=ImageFolder(
             root=os.path.join(args.train_dir, 'val'),
-            transform=trf_train,
+            transform=trf_test,
         ),
         shuffle=True,
         **loader_args
     )
 
-    return loader_train, loader_val
+    loader_test = DataLoader(
+        dataset=ImageFolder(
+            root=os.path.join(args.train_dir, 'test'),
+            transform=trf_test,
+        ),
+        shuffle=True,
+        **loader_args
+    )
+
+    return loader_train, loader_val, loader_test
 
 
 def save_checkpoint(state, is_best, folder, model_name='checkpoint', ):
@@ -252,34 +263,50 @@ if __name__ == '__main__':
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     if device.type == 'cuda':
-        # # comment this if we want reproducibility
-        # torch.backends.cudnn.benchmark = True
-        # torch.backends.cudnn.enabled = True
+        # comment this if you want reproducibility
+        torch.backends.cudnn.benchmark = True
+        torch.backends.cudnn.enabled = True
 
-        # # this might affect performance but allows reproducibility
-        torch.backends.cudnn.enabled = False
-        torch.backends.cudnn.deterministic = True
+        # # # this might affect performance but allows reproducibility
+        # torch.backends.cudnn.enabled = False
+        # torch.backends.cudnn.deterministic = True
 
     # define dataset
     trf_train, trf_test = get_transforms()
-    loader_train, loader_val = get_dataloaders(trf_train)
-    mturk_images, _ = utils.load_imgs(args.test_dir, trf_test)
+    loader_train, loader_val, loader_test = get_dataloaders(trf_train, trf_test)
 
     # create model
     model = FTModel(
         models.resnet34(pretrained=True),
         layers_to_remove=1,
+        train_only_fc=True,
         num_features=args.emb_size,
         num_classes=args.num_classes,
     )
     model = model.to(device, dtype)
 
+    args.resume = 'data/resnet_similarity_best.pth.tar'
+    if args.resume is not None:
+        if os.path.isfile(args.resume):
+            tqdm.write("=> loading checkpoint '{}'".format(args.resume))
+            checkpoint = torch.load(args.resume)
+            model.load_state_dict(checkpoint['state_dict'])
+            tqdm.write("=> loaded checkpoint '{}' (epoch {})"
+                       .format(args.resume, checkpoint['epoch']))
+        else:
+            tqdm.write("=> no checkpoint found at '{}'".format(args.resume))
+
     # define loss function
-    criterion = TripletLossHuman(
+    criterion_tl = losses.TripletLossHuman(
         margin=args.margin,
         unit_norm=True,
         device=device,
         seed=args.seed
+    )
+    criterion = losses.CrossEntropyLabelSmooth(
+        num_classes=args.num_classes,
+        device=device,
+
     )
 
     # define optimizer
@@ -310,25 +337,23 @@ if __name__ == '__main__':
 
     if args.evaluate:
         model = model.eval()
-        evaluate_model()
+        iterate_model(loader_train, 0, is_train=True)
 
     else:
         # start training and evaluation loop
         for epoch in range(args.start_epoch + 1, args.epochs + 1):
             # train step
             model = model.train()
-            epoch_iterator(loader_train, epoch, is_train=True)
+            iterate_model(loader_train, epoch, is_train=True)
             lr_scheduler.step()
 
             # evaluation step
             model = model.eval()
-            epoch_iterator(loader_val, epoch, is_train=False)
-
-            current_agreement = evaluate_model()
+            current_metric = iterate_model(loader_val, epoch, is_train=False)
 
             # checkpoint model if it is the best until now
-            is_best = current_agreement > best_agreement
-            best_agreement = max(current_agreement, best_agreement)
+            is_best = current_metric > best_agreement
+            best_agreement = max(current_metric, best_agreement)
             save_checkpoint(
                 {
                     'epoch': epoch,
@@ -339,3 +364,5 @@ if __name__ == '__main__':
                 is_best, folder=args.checkpoint_folder,
                 model_name=args.model_name + '-' + current_time
             )
+
+        current_metric = iterate_model(loader_test, -1, is_train=False)

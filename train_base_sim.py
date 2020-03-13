@@ -108,10 +108,9 @@ class RandomResize(object):
         return transforms_F.resize(img, size, self.interpolation)
 
 
-def epoch_iterator(loader, epoch, is_train):
+def train_model(loader, epoch):
     def update_progress_bar(progress_bar, losses):
-        description = '[' + str(epoch) + '-'
-        description += 'train]' if is_train else 'val]'
+        description = '[' + str(epoch) + '-train]'
         description += ' Triplet loss: '
         description += '%.4f/ %.4f (AVG)' % (losses.val, losses.avg)
         progress_bar.set_description(description)
@@ -125,7 +124,7 @@ def epoch_iterator(loader, epoch, is_train):
 
     progress_bar = tqdm(loader, total=len(loader))
     for imgs, targets in progress_bar:
-        with torch.set_grad_enabled(is_train):
+        with torch.set_grad_enabled(True):
             imgs = imgs.to(device, dtype)
             targets = targets.to(device, dtype)
 
@@ -134,11 +133,10 @@ def epoch_iterator(loader, epoch, is_train):
             loss = criterion(embeddings, targets)
             losses.update(loss.item(), imgs.size(0))
 
-            if is_train:
-                # compute gradient and update parameters
-                optimizer.zero_grad()
-                loss.backward()
-                optimizer.step()
+            # compute gradient and update parameters
+            optimizer.zero_grad()
+            loss.backward()
+            optimizer.step()
 
             update_progress_bar(progress_bar, losses)
 
@@ -269,7 +267,6 @@ if __name__ == '__main__':
     model = FTModel(
         models.resnet34(pretrained=True),
         layers_to_remove=1,
-        train_only_fc=True,
         num_features=args.emb_size,
         num_classes=args.num_classes,
     )
@@ -318,13 +315,11 @@ if __name__ == '__main__':
         for epoch in range(args.start_epoch + 1, args.epochs + 1):
             # train step
             model = model.train()
-            epoch_iterator(loader_train, epoch, is_train=True)
+            train_model(loader_train, epoch)
             lr_scheduler.step()
 
             # evaluation step
             model = model.eval()
-            epoch_iterator(loader_val, epoch, is_train=False)
-
             current_agreement = evaluate_model()
 
             # checkpoint model if it is the best until now
