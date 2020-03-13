@@ -6,7 +6,7 @@ import utils
 DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 
-def get_embeddings(model, imgs):
+def get_embeddings(model, imgs, to_numpy=True):
     print('getting embeddings')
 
     # avoid computing gradients
@@ -32,7 +32,9 @@ def get_embeddings(model, imgs):
             i += 1
 
         # move it to numpy and return
-        embs = torch.cat(partial_embs, 0).numpy()
+        embs = torch.cat(partial_embs, 0)
+    if to_numpy:
+        return embs.numpy()
     return embs
 
 
