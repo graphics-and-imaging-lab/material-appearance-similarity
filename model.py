@@ -2,8 +2,13 @@ from torch import nn
 
 
 class FTModel(nn.Module):
-    def __init__(self, pretrained, layers_to_remove, num_features, num_classes,
-                 input_size=3, train_only_fc=False):
+    def __init__(self,
+                 pretrained,
+                 layers_to_remove,
+                 num_features,
+                 num_classes,
+                 input_size=3,
+                 train_only_fc=False):
         super(FTModel, self).__init__()
 
         # extract number of features in the last layer before the ones we remove

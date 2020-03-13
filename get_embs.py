@@ -1,14 +1,12 @@
 import scipy.io
 import torch
-
+from torchvision import transforms
 import utils
 
 DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 
-def get_embeddings(model, imgs):
-    print('getting embeddings')
-
+def get_embeddings(model, imgs, to_numpy=True):
     # avoid computing gradients
     with torch.set_grad_enabled(False):
         # list to store the embeddings
@@ -32,18 +30,28 @@ def get_embeddings(model, imgs):
             i += 1
 
         # move it to numpy and return
-        embs = torch.cat(partial_embs, 0).numpy()
+        embs = torch.cat(partial_embs, 0)
+
+    if to_numpy:
+        return embs.numpy()
     return embs
 
 
 if __name__ == '__main__':
-    weights_path = 'data/model_best.pth.tar'
+    weights_path = 'checkpoints_grayscale/resnet_similarity-13_03_2020-11_20/model_best.pth.tar'
     imgs_path = 'data/havran1_ennis_298x298_LDR'
     # we will store the obtained feature vectors in this path
-    embs_path = 'data/embs_havran_ennis.mat'
+    embs_path = 'checkpoints_grayscale/resnet_similarity-13_03_2020-11_20/embs_havran_ennis.mat'
 
-    model = utils.load_model(weights_path)
-    imgs, img_paths = utils.load_imgs(imgs_path)
+    trf = transforms.Compose([
+        transforms.Resize(size=256),
+        transforms.CenterCrop(size=224),
+        transforms.Lambda(lambda x: x.convert('L')),
+        transforms.ToTensor(),
+    ])
+
+    model = utils.load_model(weights_path, input_size=1)
+    imgs, img_paths = utils.load_imgs(imgs_path, trf_test=trf)
     embs = get_embeddings(model, imgs)
 
     scipy.io.savemat(embs_path, mdict={'embs': embs, 'img_paths': img_paths})

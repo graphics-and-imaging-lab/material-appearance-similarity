@@ -2,7 +2,7 @@ import os
 import PIL
 import torch
 from torchvision import models, transforms
-
+from tqdm import tqdm
 from model import FTModel
 
 DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -14,7 +14,7 @@ DEFAULT_TRF = transforms.Compose([
 ])
 
 
-def load_model(weights_path=None):
+def load_model(weights_path=None, input_size=3):
     """ Load model with IMAGENET weights if other pretrained weights
     are not given
     """
@@ -22,6 +22,7 @@ def load_model(weights_path=None):
         pretrained=weights_path is None), 1
     model = FTModel(model,
                     layers_to_remove=layers_to_remove,
+                    input_size=input_size,
                     num_features=128,
                     num_classes=100,
                     train_only_fc=False)
@@ -62,14 +63,12 @@ def load_imgs(imgs_path, trf_test=None):
                  for f in filenames]
     img_paths.sort()
 
-    # prepare data structures
-    imgs_tensor = torch.zeros(len(img_paths), 3, IMG_SIZE, IMG_SIZE).to(DEVICE)
-
     # load all the images
-    print('loading images')
-    for i, img_path in enumerate(img_paths):
-        imgs_tensor[i] = trf_test(pil_loader(img_path))
-
+    imgs_tensor = [None] * len(img_paths)
+    tqdm.write('loading images')
+    for i, img_path in tqdm(enumerate(img_paths), total=len(img_paths)):
+        imgs_tensor[i] = (trf_test(pil_loader(img_path)))
+    imgs_tensor = torch.stack(imgs_tensor).to(DEVICE)
     return imgs_tensor, img_paths
 
 

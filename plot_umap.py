@@ -42,8 +42,8 @@ def _imscatter(x, y, image, color=None, ax=None, zoom=1.):
 
 
 if __name__ == '__main__':
-    embs_path = 'data/embs_havran_ennis.mat'
-    do_unit_norm = False
+    embs_path = 'checkpoints_grayscale/resnet_similarity-13_03_2020-11_20/embs_havran_ennis.mat'
+    do_unit_norm = True
 
     mat_file = scipy.io.loadmat(embs_path)
     embs = torch.tensor(mat_file['embs'])
