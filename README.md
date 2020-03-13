@@ -41,8 +41,9 @@ Also make sure that you have the uncropped images of each material with
  Havran geometry (`./data/havran1_ennis_298x298_LDR`).
  
 Then, set up those arguments in the trianing script and run it:
-```
-train.py --train-dir data/split_dataset --test-dir data/havran1_ennis_298x298_LDR
+```bash
+python train.py --train-dir data/split_dataset --test-dir data
+/havran1_ennis_298x298_LDR
 ```
 Using the default values in the script, the trained model yields an agreement of
  81.99% with users' answers.
