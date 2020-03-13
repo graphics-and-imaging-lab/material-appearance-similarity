@@ -7,8 +7,6 @@ DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 
 def get_embeddings(model, imgs, to_numpy=True):
-    print('getting embeddings')
-
     # avoid computing gradients
     with torch.set_grad_enabled(False):
         # list to store the embeddings

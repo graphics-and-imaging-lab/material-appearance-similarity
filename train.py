@@ -44,17 +44,20 @@ parser.add_argument('--emb-size',
                     default=128, type=int, help='size of the embedding')
 parser.add_argument('-b', '--batch-size',
                     default=20, type=int,
-                    metavar='N', help='mini-batch size (default: 64)')
+                    metavar='N', help='mini-batch size (default: 20)')
 parser.add_argument('--lr', '--learning-rate',
                     default=1e-3, type=float,
                     metavar='LR', help='initial learning rate', dest='lr')
 parser.add_argument('--wd', '--weight-decay',
                     default=5e-4, type=float,
-                    metavar='W', help='weight decay (default: 5e-5)',
+                    metavar='W', help='weight decay (default: 5e-4)',
                     dest='weight_decay')
 parser.add_argument('--betas',
                     nargs='+', default=[0.9, 0.999], type=float,
                     help='beta values for ADAM')
+parser.add_argument('--momentum',
+                    default=0.9, type=float,
+                    help='momentum in the SGD')
 parser.add_argument('--margin',
                     default=0.3, type=float,
                     help='triplet loss margin')
@@ -108,7 +111,7 @@ class RandomResize(object):
         return transforms_F.resize(img, size, self.interpolation)
 
 
-def epoch_iterator(loader, epoch, is_train):
+def train_model(loader, epoch, is_train):
     def update_progress_bar(progress_bar, losses):
         description = '[' + str(epoch) + '-'
         description += 'train]' if is_train else 'val]'
@@ -125,7 +128,7 @@ def epoch_iterator(loader, epoch, is_train):
 
     progress_bar = tqdm(loader, total=len(loader))
     for imgs, targets in progress_bar:
-        with torch.set_grad_enabled(is_train):
+        with torch.set_grad_enabled(True):
             imgs = imgs.to(device, dtype)
             targets = targets.to(device, dtype)
 
@@ -134,31 +137,35 @@ def epoch_iterator(loader, epoch, is_train):
             loss = criterion(embeddings, targets)
             losses.update(loss.item(), imgs.size(0))
 
-            if is_train:
-                # compute gradient and update parameters
-                optimizer.zero_grad()
-                loss.backward()
-                optimizer.step()
+            # compute gradient and update parameters
+            optimizer.zero_grad()
+            loss.backward()
+            optimizer.step()
 
             update_progress_bar(progress_bar, losses)
 
     return losses.avg
 
 
-def evaluate_model():
-    # get current agreement with users answers
-    current_agreement_train = criterion.get_majority_accuracy(
-        mturk_images=mturk_images,
-        model=model,
-        train=True,
-        unit_norm=True
-    )
-    current_agreement = criterion.get_majority_accuracy(
-        mturk_images=mturk_images,
-        model=model,
-        train=False,
-        unit_norm=True
-    )
+def evaluate_model(mturk_images):
+    global model
+    global criterion
+    global optimizer
+
+    with torch.set_grad_enabled(False):
+        # get current agreement with users answers
+        current_agreement_train = criterion.get_majority_accuracy(
+            mturk_images=mturk_images,
+            model=model,
+            train=True,
+            unit_norm=True
+        )
+        current_agreement = criterion.get_majority_accuracy(
+            mturk_images=mturk_images,
+            model=model,
+            train=False,
+            unit_norm=True
+        )
 
     tqdm.write('[Train]Current agreement %.4f (Best agreement %.4f)' %
                (current_agreement_train, best_agreement))
@@ -294,7 +301,7 @@ if __name__ == '__main__':
         model.parameters(),
         weight_decay=args.weight_decay,
         lr=args.lr,
-        momentum=0.9,
+        momentum=args.momentum,
         nesterov=True
     )
 
@@ -309,6 +316,7 @@ if __name__ == '__main__':
     best_agreement = 0
 
     if args.evaluate:
+        # evaluation step
         model = model.eval()
         evaluate_model()
 
@@ -317,16 +325,14 @@ if __name__ == '__main__':
         for epoch in range(args.start_epoch + 1, args.epochs + 1):
             # train step
             model = model.train()
-            epoch_iterator(loader_train, epoch, is_train=True)
+            train_model(loader_train, epoch, is_train=True)
             lr_scheduler.step()
 
             # evaluation step
             model = model.eval()
-            epoch_iterator(loader_val, epoch, is_train=False)
+            current_agreement = evaluate_model(mturk_images)
 
-            current_agreement = evaluate_model()
-
-            # checkpoint model if it is the best until now
+            # checkpoint model if it is the best
             is_best = current_agreement > best_agreement
             best_agreement = max(current_agreement, best_agreement)
             save_checkpoint(
