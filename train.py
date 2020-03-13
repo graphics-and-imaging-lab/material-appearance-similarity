@@ -111,10 +111,9 @@ class RandomResize(object):
         return transforms_F.resize(img, size, self.interpolation)
 
 
-def train_model(loader, epoch, is_train):
+def train_model(loader, epoch):
     def update_progress_bar(progress_bar, losses):
-        description = '[' + str(epoch) + '-'
-        description += 'train]' if is_train else 'val]'
+        description = '[' + str(epoch) + '-train]'
         description += ' Triplet loss: '
         description += '%.4f/ %.4f (AVG)' % (losses.val, losses.avg)
         progress_bar.set_description(description)
@@ -325,7 +324,7 @@ if __name__ == '__main__':
         for epoch in range(args.start_epoch + 1, args.epochs + 1):
             # train step
             model = model.train()
-            train_model(loader_train, epoch, is_train=True)
+            train_model(loader_train, epoch)
             lr_scheduler.step()
 
             # evaluation step
