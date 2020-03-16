@@ -45,7 +45,7 @@ parser.add_argument('-b', '--batch-size',
                     default=20, type=int,
                     metavar='N', help='mini-batch size (default: 64)')
 parser.add_argument('--lr', '--learning-rate',
-                    default=5e-2, type=float,
+                    default=1e-3, type=float,
                     metavar='LR', help='initial learning rate', dest='lr')
 parser.add_argument('--wd', '--weight-decay',
                     default=5e-5, type=float,
@@ -58,10 +58,10 @@ parser.add_argument('--margin',
                     default=0.3, type=float,
                     help='triplet loss margin')
 parser.add_argument('--checkpoint-folder',
-                    default='./checkpoints_lastFC_class',
+                    default='./checkpoints_base_class_pretrained_imagenet',
                     type=str, help='folder to store the trained models')
 parser.add_argument('--model-name',
-                    default='resnet_similarity', type=str,
+                    default='resnet_classification', type=str,
                     help='name given to the model')
 parser.add_argument('--resume',
                     default=None, type=str, metavar='PATH',
@@ -279,13 +279,11 @@ if __name__ == '__main__':
     model = FTModel(
         models.resnet34(pretrained=True),
         layers_to_remove=1,
-        train_only_fc=True,
         num_features=args.emb_size,
         num_classes=args.num_classes,
     )
     model = model.to(device, dtype)
 
-    args.resume = 'data/resnet_similarity_best.pth.tar'
     if args.resume is not None:
         if os.path.isfile(args.resume):
             tqdm.write("=> loading checkpoint '{}'".format(args.resume))

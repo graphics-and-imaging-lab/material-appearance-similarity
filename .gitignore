@@ -1,4 +1,6 @@
 
+data/split_dataset
+
 .idea/
 *.tar
 *.mat
