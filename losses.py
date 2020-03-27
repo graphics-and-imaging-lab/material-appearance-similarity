@@ -153,6 +153,90 @@ class TripletLossHuman(nn.Module):
         return agreement_count / total
 
 
+class TripletLossBrdfSim(nn.Module):
+    def __init__(self,
+                 brdf_metric_dist,
+                 margin=0.3,
+                 unit_norm=False,
+                 device=None,
+                 seed=None):
+        super(TripletLossBrdfSim, self).__init__()
+
+        # set seeds for reproducibility
+        if seed is not None:
+            torch.manual_seed(seed)
+            torch.cuda.manual_seed(seed)
+            np.random.seed(seed)
+            random.seed(seed)
+
+        # set loss variables
+        self.margin = margin
+        self.unit_norm = unit_norm
+        self.brdf_metric_dist = brdf_metric_dist
+
+        # triplet loss function used to model user answers
+        self.ranking_loss = nn.MarginRankingLoss(margin=self.margin)
+
+    def forward(self, inputs, targets):
+        """
+        Args:
+            inputs: feature matrix with shape (batch_size, feat_dim)
+            targets: ground truth labels with shape (batch_size)
+        """
+        if self.unit_norm:
+            inputs = inputs / inputs.norm(dim=1, keepdim=True)
+
+        # Compute pairwise distances
+        dist = utils.pairwise_dist(inputs)
+
+        # move answers to correct device
+        targets = targets.long()
+
+        # For each anchor, find the hardest positive and negative
+        batch_size = inputs.size(0)
+
+        # sample triplets
+        dist_ap = torch.zeros(batch_size).to(inputs.device, inputs.dtype)
+        dist_an = torch.zeros(batch_size).to(inputs.device, inputs.dtype)
+        for ix in range(batch_size):
+            # get two random indexes
+            ixs = torch.randint(low=0, high=batch_size - 1, size=(2,))
+            ixs = ixs.to(inputs.device, torch.long)
+            while ix in ixs:
+                ixs = torch.randint(low=0, high=batch_size - 1, size=(2,))
+                ixs = ixs.to(inputs.device, torch.long)
+
+            # get their distances to the anchor according to the BRDF metric
+            metric_dist_1 = self.brdf_metric_dist[targets[ix], targets[ixs[0]]]
+            metric_dist_2 = self.brdf_metric_dist[targets[ix], targets[ixs[1]]]
+
+            # get their model distances and take into account
+            # the positive/ negative image from the BRDF metric
+            if metric_dist_1 < metric_dist_2:
+                dist_ap[ix] = dist[ix, ixs[0]]
+                dist_an[ix] = dist[ix, ixs[1]]
+            else:
+                dist_ap[ix] = dist[ix, ixs[1]]
+                dist_an[ix] = dist[ix, ixs[0]]
+
+        loss_metric = (dist_ap - dist_an + self.margin).clamp(min=0.).mean()
+        # Compute ranking hinge loss
+        # zeros = torch.zeros_like(dist_ap)
+        # loss_human = self.ranking_loss(dist_ap, dist_an, zeros)
+
+        # move from distances to probabilities
+        s_ap = 1 / (dist_ap + 1)
+        s_an = 1 / (dist_an + 1)
+
+        # compute perplexity
+        p_ap = s_ap / (s_ap + s_an)
+        loss_perplexity = (-torch.log(p_ap + 1e-8)).mean()
+
+        # get total loss and return
+        loss = loss_metric  # + loss_perplexity
+        return loss
+
+
 class CrossEntropyLabelSmooth(nn.Module):
     """Cross entropy loss with a label smoothing regularizer.
     Reference:
