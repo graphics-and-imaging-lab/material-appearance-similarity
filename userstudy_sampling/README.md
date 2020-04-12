@@ -6,7 +6,8 @@ There are two scripts in the folder:
 - `triplet_sampling.py` uses `ckl.py` to find the set of triplets that will
 maximize the information gain in your two-alternative forced-choice (2AFC) user study.
 
-This is an iterative algorithm where we sample the triplets that maximize the information gain, those triplets are answered by the
+This is an iterative algorithm where we sample the triplets that maximize the information gain (this also could be thought as sampling
+the triplets that we have less information about), those triplets are answered by the
 participants of the user study, with the new answers, we find again the triplets that maximize the information gain, and so on. 
 This iterative process works as follows:
  - The first iteration the stimuli in the user study should be randomly sampled (we have no information yet in order to sample the pairs that
@@ -24,8 +25,8 @@ Most probably no modifications to `ckl.py` should be done.
 In `triplet_sampling.py`:
 - First set the paths to read the data of the user studies and output the sampled triplets
 ```python
-answers_path = None  # path where answers are stored
-out_path = None  # path to store the sampling
+answers_path = "Fill this"  # path where answers are stored
+out_path = "Fill this"  # path to store the sampling ('data/sampling_iter_10.json')
 nworkers = 10  # number of people doing the user study in each iteration
 nquestions = 100  # number of triplets to be answer for each participant
 ```
@@ -33,7 +34,10 @@ nquestions = 100  # number of triplets to be answer for each participant
 - read all the answers from the user study until now (read the comments in the code to know how your data should look like)
 ```python
 # read the input data of the test
-input_data = None  # python list with each possible stimuli to sample.
+
+# python list with each possible stimuli to sample in the user studies. 
+# This could be just a list of paths where each path is a url to its corresponding stimulus.
+input_data = # here goes the code to read the paths (or urls) to all the possible stimulus to sample  
 nimages = len(input_data)
 
 # get all the answered triplets in the user study until now
@@ -41,18 +45,20 @@ nimages = len(input_data)
 # answers is a np.array of integers with size (N, 3) containing all the
 # triplets answered until now in the user studies (N). The triplets are
 # stored as first the reference, and then the pair that the participants
-# choose from. The array stores,  the class of each stimuli for each triplet.
-# Note that the class is an integer with maximum value len(input_dat)
+# choose from. The array stores,  the class (as an integer) of each stimuli for each triplet.
+# Note that the class is an integer with maximum value len(input_data). Therefore, answers[0, 0] 
+# gives me the class of the reference stimulus of the triplet with index 0. if I access 
+# input_data[answers[0, 0]], I am getting the url of that element.
 # agreement is a np.array of size (N, 2) that stores the number of users
 # that answered each pair. agreement[x, 0] corresponds to the number of
 # users that have answered the stimuli answers[x, 1].
-answers, agreement = None # here goes the code to read the answers from the user study
+answers, agreement = # here goes the code to read the answers from the user study
 
 # here we split the answers that have equal and different agreement.
 # Equal agreement means that the same number of participants have choosen
 # both pairs (agreement[x,0] == agreement[x,1]). Both keep the same format
 # as the answers array. 
-answers_equal, answers_diff = None # here goes the code to split the answers
+answers_equal, answers_diff = # here goes the code to split the answers
 ```
 
 #### How to interpret the output
