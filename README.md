@@ -55,7 +55,7 @@ Using the default values in the script, the trained model yields an agreement of
 Next, get the feature vectors for some images. First, modify paths inside `get_embs.py`.
 ```python
 ...
-weights_path = 'data/model_best.pth.tar'
+weights_path = 'data/model_best_acc7593.pth.tar'
 imgs_path = 'data/havran1_stpeters_256x256_LDR'
 embs_path = 'data/embs.mat' # we will store the obtained feature vectors in this path
 ...

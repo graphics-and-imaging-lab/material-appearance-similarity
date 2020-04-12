@@ -42,7 +42,7 @@ def _imscatter(x, y, image, color=None, ax=None, zoom=1.):
 
 
 if __name__ == '__main__':
-    embs_path = 'checkpoints_grayscale/resnet_similarity-13_03_2020-11_20/embs_havran_ennis.mat'
+    embs_path = '/media/mlagunas/Data/Projects/2019-MATERIAL_SIMILARITY/code/minimal_working/checkpoints_brdf_l4-lab_sim/resnet_brdf_similarity-27_03_2020-23_43/embs_havran_ennis.mat'
     do_unit_norm = True
 
     mat_file = scipy.io.loadmat(embs_path)

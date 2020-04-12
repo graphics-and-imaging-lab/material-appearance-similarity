@@ -38,19 +38,20 @@ def get_embeddings(model, imgs, to_numpy=True):
 
 
 if __name__ == '__main__':
-    weights_path = 'checkpoints_grayscale/resnet_similarity-13_03_2020-11_20/model_best.pth.tar'
+    weights_path = '/media/mlagunas/Data/Projects/2019-MATERIAL_SIMILARITY/code/minimal_working/checkpoints_brdf_l4-lab_sim/resnet_brdf_similarity-27_03_2020-23_43/model_best_acc6812.pth.tar'
+    folder_path = '/'.join(weights_path.split('/')[:-1])
     imgs_path = 'data/havran1_ennis_298x298_LDR'
     # we will store the obtained feature vectors in this path
-    embs_path = 'checkpoints_grayscale/resnet_similarity-13_03_2020-11_20/embs_havran_ennis.mat'
+    embs_path = folder_path + '/embs_havran_ennis.mat'
 
     trf = transforms.Compose([
         transforms.Resize(size=256),
         transforms.CenterCrop(size=224),
-        transforms.Lambda(lambda x: x.convert('L')),
+        # transforms.Lambda(lambda x: x.convert('L')),
         transforms.ToTensor(),
     ])
 
-    model = utils.load_model(weights_path, input_size=1)
+    model = utils.load_model(weights_path, input_size=3)
     imgs, img_paths = utils.load_imgs(imgs_path, trf_test=trf)
     embs = get_embeddings(model, imgs)
     scipy.io.savemat(embs_path, mdict={'embs': embs, 'img_paths': img_paths})

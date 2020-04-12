@@ -59,7 +59,7 @@ parser.add_argument('--margin',
                     default=0.3, type=float,
                     help='triplet loss margin')
 parser.add_argument('--checkpoint-folder',
-                    default='./checkpoints_brdf_rms_sim',
+                    default='./checkpoints_brdf_l4-lab_sim',
                     type=str, help='folder to store the trained models')
 parser.add_argument('--model-name',
                     default='resnet_brdf_similarity', type=str,
@@ -276,14 +276,14 @@ if __name__ == '__main__':
 
     # define loss function
     brdf_merl_metrics = scipy.io.loadmat('data/brdf_merl_metrics.mat')
-    rms = torch.tensor(brdf_merl_metrics['rms']).to(device)
-    # rms_cos = torch.tensor(brdf_merl_metrics['rms_cos']).to(device)
-    # rms_cos_cube = torch.tensor(brdf_merl_metrics['rms_cos_cube']).to(device)
-    # l2_lab = torch.tensor(brdf_merl_metrics['dist_L2_lab']).to(device)
-    # l4_lab = torch.tensor(brdf_merl_metrics['dist_L4_lab']).to(device)
+    # metric = torch.tensor(brdf_merl_metrics['rms']).to(device)
+    # metric = torch.tensor(brdf_merl_metrics['rms_cos']).to(device)
+    # metric = torch.tensor(brdf_merl_metrics['rms_cos_cube']).to(device)
+    # metric = torch.tensor(brdf_merl_metrics['dist_L2_lab']).to(device)
+    metric = torch.tensor(brdf_merl_metrics['dist_L4_lab']).to(device)
     criterion = losses.TripletLossBrdfSim(
         margin=args.margin,
-        brdf_metric_dist=rms,
+        brdf_metric_dist=metric,
         unit_norm=True,
         device=device,
         seed=args.seed

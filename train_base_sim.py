@@ -265,7 +265,7 @@ if __name__ == '__main__':
 
     # create model
     model = FTModel(
-        models.resnet34(pretrained=True),
+        models.resnet34(pretrained=False),
         layers_to_remove=1,
         num_features=args.emb_size,
         num_classes=args.num_classes,
@@ -311,6 +311,8 @@ if __name__ == '__main__':
         evaluate_model()
 
     else:
+        model = model.eval()
+        evaluate_model()
         # start training and evaluation loop
         for epoch in range(args.start_epoch + 1, args.epochs + 1):
             # train step
