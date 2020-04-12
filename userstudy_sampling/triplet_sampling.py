@@ -414,6 +414,7 @@ if __name__ == '__main__':
     answers_path = None  # path where answers are stored
     out_path = None  # path to store the sampling ('data/sampling_iter_10.json')
     nworkers = 10  # number of people doing the user study in each iteration
+    nquestions = 100  # number of triplets to be answer for each participant
     out_dir = os.path.dirname(out_path)
     os.makedirs(out_dir, exist_ok=True)
 
@@ -460,7 +461,7 @@ if __name__ == '__main__':
         max_info_pairs, pairs_infogain = maximal_information_pairs(X, mu,
                                                                    answers_diff,
                                                                    rest_triplets,
-                                                                   npairs=1000)
+                                                                   npairs=nquestions * nworkers)
         tqdm.write('infogain max %f | min %f' %
                    (pairs_infogain[0], pairs_infogain[-1]))
 
