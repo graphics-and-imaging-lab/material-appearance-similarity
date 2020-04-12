@@ -5,7 +5,7 @@ from random import shuffle
 import numpy as np
 import torch
 from tqdm import tqdm
-
+import os
 import userstudy_sampling.ckl as ckl
 
 random.seed(1234)
@@ -16,6 +16,7 @@ torch.set_default_tensor_type(torch.DoubleTensor)
 
 import json
 
+
 def json_readfile(filename):
     with open(filename, 'r') as f:
         return json.load(f)
@@ -25,6 +26,7 @@ def json_savefile(filename, data):
     # store the new json file
     with open(filename, 'w') as f:
         json.dump(data, f, sort_keys=True)
+
 
 def triplet_in_matrix(triplet, matrix):
     # check that the reference has not been previously sampled
@@ -410,8 +412,10 @@ def maximal_information_pairs(x, mu, answers, possible_triplets, npairs,
 if __name__ == '__main__':
 
     answers_path = None  # path where answers are stored
-    out_path = None  # path to store the sampling
+    out_path = None  # path to store the sampling ('data/sampling_iter_10.json')
     nworkers = 10  # number of people doing the user study in each iteration
+    out_dir = os.path.dirname(out_path)
+    os.makedirs(out_dir, exist_ok=True)
 
     # read the input data of the test (here I used urls pointing to the images)
     """ fill in 
@@ -425,7 +429,7 @@ if __name__ == '__main__':
     # answers is a np.array of integers with size (N, 3) containing all the
     # triplets answered until now in the user studies (N). The triplets are
     # stored as first the reference, and then the pair that the participants
-    # choose from. The array stores,  the class of each stimuli for each triplet.
+    # choose from. The array stores, the class of each stimuli for each triplet.
     # Note that the class is an integer with maximum value len(input_dat)
     # agreement is a np.array of size (N, 2) that stores the number of users
     # that answered each pair. agreement[x, 0] corresponds to the number of
@@ -460,12 +464,11 @@ if __name__ == '__main__':
         tqdm.write('infogain max %f | min %f' %
                    (pairs_infogain[0], pairs_infogain[-1]))
 
-        # save data for its use later in the data analysis part
-        """ fill in
-        """
-        torch.save(X, 'PATH_TO_DATA/X_matrix.pt')
-        torch.save(max_info_pairs, 'PATH_TO_DATA/max_info_pairs.pt')
-        torch.save(pairs_infogain, '.PATH_TO_DATA/pairs_infogain_matrix.pt')
+        # save data in case it is needed later for their analysis
+        add_data = out_dir + '/additional_data/'
+        torch.save(X, add_data + 'X_matrix.pt')
+        torch.save(max_info_pairs, add_data + 'max_info_pairs.pt')
+        torch.save(pairs_infogain, add_data + 'pairs_infogain_matrix.pt')
 
         # obtain triplets using a uniform prior over the samples
         triplets = build_triplets_from_pairs(nimages, max_info_pairs, answers)
