@@ -42,7 +42,7 @@ def _imscatter(x, y, image, color=None, ax=None, zoom=1.):
 
 
 if __name__ == '__main__':
-    embs_path = '/media/mlagunas/Data/Projects/2019-MATERIAL_SIMILARITY/code/minimal_working/checkpoints_brdf_l4-lab_sim/resnet_brdf_similarity-27_03_2020-23_43/embs_havran_ennis.mat'
+    embs_path = '/media/mlagunas/Data/Projects/2019-MATERIAL_SIMILARITY/code/minimal_working/checkpoints_base_class_pretrained_ours/resnet_similarity-16_03_2020-11_37/embs_havran_ennis.mat'
     do_unit_norm = True
 
     mat_file = scipy.io.loadmat(embs_path)
@@ -55,13 +55,14 @@ if __name__ == '__main__':
     img_paths = [str(elem).strip() for elem in mat_file['img_paths']]
 
     # get umap from the embeddings
-    umap_fit = umap.UMAP(n_neighbors=30,
+    umap_fit = umap.UMAP(n_neighbors=5,
                          init='spectral',
-                         min_dist=4,
-                         spread=8,
-                         metric='l1')
+                         min_dist=3,
+                         spread=10,
+                         metric='l2',
+                         transform_seed=123)
     umap_emb = umap_fit.fit_transform(embs)
-
+    np.save('data/class_umap.npy', umap_emb)
     # plot each point of the umap as its corresponding image
     fig = plt.figure()
     ax = fig.gca()
@@ -69,6 +70,8 @@ if __name__ == '__main__':
         _imscatter(point[0], point[1], img_paths[i], zoom=0.12, ax=ax)
     plt.xticks([])
     plt.yticks([])
-    plt.gca().invert_yaxis()
-    plt.gca().invert_xaxis()
+    plt.savefig("data/classification_umap.pdf")
+
+    # plt.gca().invert_yaxis()
+    # plt.gca().invert_xaxis()
     plt.show()

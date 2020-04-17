@@ -5,7 +5,8 @@ from torchvision import models, transforms
 from tqdm import tqdm
 from model import FTModel
 
-DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+# DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+DEVICE = torch.device('cpu')
 IMG_SIZE = 224
 DEFAULT_TRF = transforms.Compose([
     transforms.Resize(size=(256)),

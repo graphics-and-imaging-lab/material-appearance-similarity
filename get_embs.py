@@ -3,7 +3,8 @@ import torch
 from torchvision import transforms
 import utils
 
-DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+DEVICE = torch.device('cpu')
+# DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 
 def get_embeddings(model, imgs, to_numpy=True):
@@ -38,7 +39,7 @@ def get_embeddings(model, imgs, to_numpy=True):
 
 
 if __name__ == '__main__':
-    weights_path = '/media/mlagunas/Data/Projects/2019-MATERIAL_SIMILARITY/code/minimal_working/checkpoints_brdf_l4-lab_sim/resnet_brdf_similarity-27_03_2020-23_43/model_best_acc6812.pth.tar'
+    weights_path = '/media/mlagunas/Data/Projects/2019-MATERIAL_SIMILARITY/code/minimal_working/checkpoints_base_class/resnet_similarity-15_03_2020-10_38/model_best.pth.tar'
     folder_path = '/'.join(weights_path.split('/')[:-1])
     imgs_path = 'data/havran1_ennis_298x298_LDR'
     # we will store the obtained feature vectors in this path
