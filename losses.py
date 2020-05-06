@@ -6,6 +6,37 @@ import utils
 from get_embs import get_embeddings
 import random
 import numpy as np
+import torch.nn.functional as F
+
+
+class TripletLoss(nn.Module):
+    """
+    Online Triplets loss
+    Takes a batch of embeddings and corresponding labels.
+    Triplets are generated using triplet_selector object that take embeddings and targets and return indices of
+    triplets
+    """
+
+    def __init__(self, margin, triplet_selector, unit_norm=True):
+        super(TripletLoss, self).__init__()
+        self.margin = margin
+        self.unit_norm = unit_norm
+        self.triplet_selector = triplet_selector
+
+    def forward(self, embeddings, target):
+        triplets = self.triplet_selector.get_triplets(embeddings, target)
+        if self.unit_norm:
+            embeddings = embeddings / embeddings.norm(dim=1, keepdim=True)
+        if embeddings.is_cuda:
+            triplets = triplets.cuda()
+
+        ap_distances = (embeddings[triplets[:, 0]] - embeddings[
+            triplets[:, 1]]).pow(2).sum(1)  # .pow(.5)
+        an_distances = (embeddings[triplets[:, 0]] - embeddings[
+            triplets[:, 2]]).pow(2).sum(1)  # .pow(.5)
+        losses = F.relu(ap_distances - an_distances + self.margin)
+
+        return losses.mean()
 
 
 class TripletLossHuman(nn.Module):
@@ -145,6 +176,7 @@ class TripletLossHuman(nn.Module):
             total = len(self.user_answers_test)
 
         for agr, imgs_ix in iterator:
+            assert agr[0] > agr[1]
             r, a, n = imgs_ix
             positive_dist = dist[r, a]
             negative_dist = dist[r, n]

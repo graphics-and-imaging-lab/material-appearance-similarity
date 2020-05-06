@@ -21,7 +21,7 @@ current_time = datetime.now().strftime("%d_%m_%Y-%H_%M")
 parser = argparse.ArgumentParser(description='Material Similarity Training')
 parser.add_argument('--train-dir',
                     metavar='DIR', help='path to dataset',
-                    default='data/split_dataset')
+                    default='../../data/split_dataset')
 parser.add_argument('--test-dir',
                     metavar='DIR', help='path to dataset',
                     default='data/havran1_ennis_298x298_LDR')
@@ -58,10 +58,10 @@ parser.add_argument('--margin',
                     default=0.3, type=float,
                     help='triplet loss margin')
 parser.add_argument('--checkpoint-folder',
-                    default='./checkpoints_base_class_pretrained_imagenet',
+                    default='./checkpoints2',
                     type=str, help='folder to store the trained models')
 parser.add_argument('--model-name',
-                    default='resnet_classification', type=str,
+                    default='[pretrained]resnet_classification', type=str,
                     help='name given to the model')
 parser.add_argument('--resume',
                     default=None, type=str, metavar='PATH',
@@ -331,7 +331,7 @@ if __name__ == '__main__':
     )
 
     # set a high value for the error
-    best_agreement = 0
+    best_agreement = 9999
 
     if args.evaluate:
         model = model.eval()
@@ -350,8 +350,9 @@ if __name__ == '__main__':
             current_metric = iterate_model(loader_val, epoch, is_train=False)
 
             # checkpoint model if it is the best until now
-            is_best = current_metric > best_agreement
-            best_agreement = max(current_metric, best_agreement)
+            is_best = current_metric < best_agreement
+            print(epoch, ' is best', is_best)
+            best_agreement = min(current_metric, best_agreement)
             save_checkpoint(
                 {
                     'epoch': epoch,

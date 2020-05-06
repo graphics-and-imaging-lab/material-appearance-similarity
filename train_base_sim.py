@@ -22,7 +22,7 @@ current_time = datetime.now().strftime("%d_%m_%Y-%H_%M")
 parser = argparse.ArgumentParser(description='Material Similarity Training')
 parser.add_argument('--train-dir',
                     metavar='DIR', help='path to dataset',
-                    default='data/split_dataset')
+                    default='../../data/split_dataset')
 parser.add_argument('--test-dir',
                     metavar='DIR', help='path to dataset',
                     default='data/havran1_ennis_298x298_LDR')
@@ -62,7 +62,7 @@ parser.add_argument('--checkpoint-folder',
                     default='./checkpoints',
                     type=str, help='folder to store the trained models')
 parser.add_argument('--model-name',
-                    default='resnet_similarity', type=str,
+                    default='[nopretained]resnet_human_similarity', type=str,
                     help='name given to the model')
 parser.add_argument('--resume',
                     default='', type=str, metavar='PATH',
@@ -262,6 +262,7 @@ if __name__ == '__main__':
     trf_train, trf_test = get_transforms()
     loader_train, loader_val = get_dataloaders(trf_train)
     mturk_images, _ = utils.load_imgs(args.test_dir, trf_test)
+    mturk_images = mturk_images.to(device, dtype)
 
     # create model
     model = FTModel(

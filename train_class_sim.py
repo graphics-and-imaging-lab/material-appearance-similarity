@@ -6,14 +6,14 @@ import utils
 import numpy as np
 import random
 import torchvision.transforms.functional as transforms_F
-import scipy.io
-import losses
+
 from torch import optim
 from torch.utils.data import DataLoader
 from PIL import Image
 from torchvision import transforms, models
 from datetime import datetime
 from torchvision.datasets import ImageFolder
+from losses import TripletLoss, TripletLossHuman
 from model import FTModel
 from tqdm import tqdm
 
@@ -43,7 +43,7 @@ parser.add_argument('--num-classes', default=100, type=int,
 parser.add_argument('--emb-size',
                     default=128, type=int, help='size of the embedding')
 parser.add_argument('-b', '--batch-size',
-                    default=20, type=int,
+                    default=256, type=int,
                     metavar='N', help='mini-batch size (default: 64)')
 parser.add_argument('--lr', '--learning-rate',
                     default=1e-3, type=float,
@@ -59,10 +59,10 @@ parser.add_argument('--margin',
                     default=0.3, type=float,
                     help='triplet loss margin')
 parser.add_argument('--checkpoint-folder',
-                    default='./[NEW]checkpoints_brdf_rms-cos-cube_sim',
+                    default='./checkpoints',
                     type=str, help='folder to store the trained models')
 parser.add_argument('--model-name',
-                    default='resnet_brdf_similarity', type=str,
+                    default='[pretrained]resnet_class_similarity', type=str,
                     help='name given to the model')
 parser.add_argument('--resume',
                     default='', type=str, metavar='PATH',
@@ -144,16 +144,14 @@ def train_model(loader, epoch):
 
 
 def evaluate_model():
-    criterion_humans = losses.TripletLossHuman()
-
     # get current agreement with users answers
-    current_agreement_train = criterion_humans.get_majority_accuracy(
+    current_agreement_train = criterion_human.get_majority_accuracy(
         mturk_images=mturk_images,
         model=model,
         train=True,
         unit_norm=True
     )
-    current_agreement = criterion_humans.get_majority_accuracy(
+    current_agreement = criterion_human.get_majority_accuracy(
         mturk_images=mturk_images,
         model=model,
         train=False,
@@ -276,18 +274,15 @@ if __name__ == '__main__':
     model = model.to(device, dtype)
 
     # define loss function
-    brdf_merl_metrics = scipy.io.loadmat('data/brdf_merl_metrics.mat')
-    # metric = torch.tensor(brdf_merl_metrics['rms']).to(device)
-    # metric = torch.tensor(brdf_merl_metrics['rms_cos']).to(device)
-    metric = torch.tensor(brdf_merl_metrics['rms_cos_cube']).to(device)
-    # metric = torch.tensor(brdf_merl_metrics['dist_L2_lab']).to(device)
-    # metric = torch.tensor(brdf_merl_metrics['dist_L4_lab']).to(device)
-    criterion = losses.TripletLossBrdfSim(
+    criterion = TripletLoss(
         margin=args.margin,
-        brdf_metric_dist=metric,
+        triplet_selector=utils.SemihardNegativeTripletSelector(args.margin)
+    )
+    criterion_human = TripletLossHuman(
+        margin=args.margin,
         unit_norm=True,
-        device=device,
-        seed=args.seed
+        seed=args.seed,
+        device=device
     )
 
     # define optimizer

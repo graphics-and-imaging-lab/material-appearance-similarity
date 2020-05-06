@@ -21,7 +21,7 @@ current_time = datetime.now().strftime("%d_%m_%Y-%H_%M")
 parser = argparse.ArgumentParser(description='Material Similarity Training')
 parser.add_argument('--train-dir',
                     metavar='DIR', help='path to dataset',
-                    default='data/split_dataset')
+                    default='/media/mlagunas/Data/Projects/2019-MATERIAL_SIMILARITY/data/split_dataset')
 parser.add_argument('--test-dir',
                     metavar='DIR', help='path to dataset',
                     default='data/havran1_ennis_298x298_LDR')
@@ -58,10 +58,11 @@ parser.add_argument('--margin',
                     default=0.3, type=float,
                     help='triplet loss margin')
 parser.add_argument('--checkpoint-folder',
-                    default='./checkpoints_lastFC_class',
+                    default='./checkpoints',
                     type=str, help='folder to store the trained models')
 parser.add_argument('--model-name',
-                    default='resnet_similarity', type=str,
+                    default='[human-sim]resnet_classification_lastfc',
+                    type=str,
                     help='name given to the model')
 parser.add_argument('--resume',
                     default=None, type=str, metavar='PATH',
@@ -285,7 +286,7 @@ if __name__ == '__main__':
     )
     model = model.to(device, dtype)
 
-    args.resume = 'data/resnet_similarity_best.pth.tar'
+    args.resume = '/media/mlagunas/Data/Projects/2019-MATERIAL_SIMILARITY/code/minimal_working/checkpoints/[pretrained]resnet_human_similarity-26_04_2020-20_39/model_best.pth.tar'
     if args.resume is not None:
         if os.path.isfile(args.resume):
             tqdm.write("=> loading checkpoint '{}'".format(args.resume))
